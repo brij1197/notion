@@ -9,7 +9,7 @@ const openai = new OpenAIApi(config);
 export async function generateImagePrompt(name: string) {
   try {
     const response = await openai.createChatCompletion({
-      model: "gpt-4o-mini",
+      model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
