@@ -7,8 +7,6 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const { noteId } = await req.json();
-    //extract dalle imageurl
-    //save it to firebase
     const notes = await db
       .select()
       .from($notes)

@@ -17,7 +17,7 @@ export async function generateImagePrompt(name: string) {
         },
         {
           role: "user",
-          content: `Generate a thumbnail description for a note with the title '${name}'`,
+          content: `Please generate a thumbnail description for a note with the title '${name}'`,
         },
       ],
     });
