@@ -21,6 +21,14 @@ type Props = {};
 const CreateNoteDialog = (props: Props) => {
   const router = useRouter();
   const [input, setInput] = React.useState("");
+  const uploadToFirebase = useMutation({
+    mutationFn: async (noteId: string) => {
+      const response = await axios.post("/api/uploadToFirebase", {
+        noteId,
+      });
+      return response.data;
+    },
+  });
 
   const createNotebook = useMutation({
     mutationFn: async () => {
@@ -39,7 +47,8 @@ const CreateNoteDialog = (props: Props) => {
     }
     createNotebook.mutate(undefined, {
       onSuccess: ({ note_id }) => {
-        console.log("Create new note: ", { note_id });
+        console.log("Created new note: ", { note_id });
+        uploadToFirebase.mutate(note_id);
         router.push(`/notebook/${note_id}`);
       },
       onError: (error) => {
