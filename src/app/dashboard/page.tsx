@@ -13,6 +13,16 @@ import React from "react";
 
 type Props = {};
 
+// Checks if a URL belongs exactly to the trusted OpenAI DALL-E image host
+function isTrustedOAIImage(url: string): boolean {
+  try {
+    const { hostname } = new URL(url);
+    return hostname === "oaidalleapiprodscus.blob.core.windows.net";
+  } catch {
+    return false;
+  }
+}
+
 const DashboardPage = async (props: Props) => {
   const { userId } = await auth();
   const notes = await db
@@ -54,7 +64,7 @@ const DashboardPage = async (props: Props) => {
               return (
                 <a href={`/notebook/${note.id}`} key={note.id}>
                   <div className="border border-stone-300 rounded-lg overflow-hidden flex flex-col hover:shadow-xl transition hover:-translate-y-1">
-                    {note.imageUrl && !note.imageUrl.includes('oaidalleapiprodscus.blob.core.windows.net') ? (
+                    {note.imageUrl && !isTrustedOAIImage(note.imageUrl) ? (
                       <Image
                         src={note.imageUrl}
                         width={400}
