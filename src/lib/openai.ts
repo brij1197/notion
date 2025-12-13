@@ -1,15 +1,19 @@
-import { Configuration, OpenAIApi } from "openai-edge";
+import { createOpenAI } from '@ai-sdk/openai';
+import { generateText } from 'ai';
+import OpenAI from 'openai';
 
-const config = new Configuration({
+const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const openai = new OpenAIApi(config);
+const openaiClient = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function generateImagePrompt(name: string) {
   try {
-    const response = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
+    const { text } = await generateText({
+      model: openai('gpt-4o-mini'),
       messages: [
         {
           role: "system",
@@ -21,9 +25,7 @@ export async function generateImagePrompt(name: string) {
         },
       ],
     });
-    const data = await response.json();
-    const image_description = data.choices[0].message.content;
-    return image_description as string;
+    return text;
   } catch (error) {
     console.log(error);
     throw error;
@@ -32,13 +34,12 @@ export async function generateImagePrompt(name: string) {
 
 export async function generateImage(image_description: string) {
   try {
-    const response = await openai.createImage({
+    const response = await openaiClient.images.generate({
       prompt: image_description,
       n: 1,
       size: "256x256",
     });
-    const data = await response.json();
-    const image_url = data.data[0].url;
+    const image_url = response.data?.[0]?.url;
     return image_url as string;
   } catch (error) {
     console.log(error);

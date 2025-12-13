@@ -54,12 +54,19 @@ const DashboardPage = async (props: Props) => {
               return (
                 <a href={`/notebook/${note.id}`} key={note.id}>
                   <div className="border border-stone-300 rounded-lg overflow-hidden flex flex-col hover:shadow-xl transition hover:-translate-y-1">
-                    <Image
-                      src={note.imageUrl || ""}
-                      width={400}
-                      height={200}
-                      alt={note.name}
-                    />
+                    {note.imageUrl && !note.imageUrl.includes('oaidalleapiprodscus.blob.core.windows.net') ? (
+                      <Image
+                        src={note.imageUrl}
+                        width={400}
+                        height={200}
+                        alt={note.name}
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full h-[200px] bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                        <span className="text-gray-600 font-medium">{note.name}</span>
+                      </div>
+                    )}
                     <div className="p-4">
                       <h3 className="text-xl font-semibold text-gray-900">
                         {note.name}

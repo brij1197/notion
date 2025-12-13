@@ -1,15 +1,15 @@
 "use client";
 import React from "react";
-import { EditorContent, useEditor } from "@tiptap/react";
+import { EditorContent, useEditor, Extension } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { Button } from "./ui/button";
 import TipTapMenuBar from "./TipTapMenuBar";
 import { useDebounce } from "@/lib/useDebounce";
 import { useMutation } from "@tanstack/react-query";
-import Text from "@tiptap/extension-text";
+
 import axios from "axios";
 import { NoteType } from "@/lib/db/schema";
-import { useCompletion } from "ai/react";
+import { useCompletion } from "@ai-sdk/react";
 
 type Props = { note: NoteType };
 
@@ -17,7 +17,7 @@ const TipTapEditor = ({ note }: Props) => {
   const [editorState, setEditorState] = React.useState(
     note.editorState || `<h1>${note.name}</h1>`
   );
-  const { complete, completion } = useCompletion({
+  const { complete, completion, error, isLoading } = useCompletion({
     api: "/api/completion",
   });
   const saveNote = useMutation({
@@ -29,24 +29,28 @@ const TipTapEditor = ({ note }: Props) => {
       return response.data;
     },
   });
-  const customText = Text.extend({
-    addKeyboardShortcuts() {
-      return {
-        "Alt-a": () => {
-          const prompt = this.editor.getText().split(" ").slice(-30).join(" ");
-          complete(prompt);
-          return true;
-        },
-      };
-    },
-  });
 
   const editor = useEditor({
     autofocus: true,
-    extensions: [StarterKit, customText],
+    extensions: [StarterKit],
     content: editorState,
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       setEditorState(editor.getHTML());
+    },
+    editorProps: {
+      handleKeyDown: (view, event) => {
+        if (event.altKey && event.key === "a") {
+          event.preventDefault();
+          const prompt = view.state.doc.textContent
+            .split(" ")
+            .slice(-30)
+            .join(" ");
+          complete(prompt);
+          return true;
+        }
+        return false;
+      },
     },
   });
 
@@ -64,7 +68,7 @@ const TipTapEditor = ({ note }: Props) => {
     if (debouncedEditorState === "") return;
     saveNote.mutate(undefined, {
       onSuccess: (data) => {
-        console.log("success update!", data);
+        // Note saved successfully
       },
       onError: (err) => {
         console.error(err);
@@ -73,10 +77,21 @@ const TipTapEditor = ({ note }: Props) => {
   }, [debouncedEditorState]);
   return (
     <>
-      <div className="flex">
+      <div className="flex gap-2">
         {editor && <TipTapMenuBar editor={editor} />}
         <Button disabled variant={"outline"}>
           {saveNote.isPending ? "Saving..." : "Saved"}
+        </Button>
+        <Button
+          onClick={() => {
+            const prompt =
+              editor?.getText().split(" ").slice(-30).join(" ") || "";
+            console.log("Test autocomplete:", prompt);
+            complete(prompt);
+          }}
+          variant="secondary"
+        >
+          Test AI
         </Button>
       </div>
       <div className="prose prose-sm w-full mt-4">
