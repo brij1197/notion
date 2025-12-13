@@ -1,6 +1,6 @@
 # Notion Clone
 
-**"A Notion Clone built with Next.js, featuring AI-powered AutoComplete and Image Generation capabilities."**
+**A Notion Clone built with Next.js, featuring AI-powered AutoComplete and Image Generation capabilities.**
 
 ## Getting Started
 
